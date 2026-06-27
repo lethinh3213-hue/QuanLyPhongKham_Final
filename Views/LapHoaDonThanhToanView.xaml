@@ -1,0 +1,200 @@
+﻿<Window x:Class="QuanLyPhongKham.Views.LapHoaDonThanhToanView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lập hóa đơn thanh toán"
+        Height="470" Width="620"
+        WindowStartupLocation="CenterScreen"
+        Background="White"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Style nút màu xanh -->
+        <Style x:Key="BlueButton" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Label nhỏ màu xám cho tiêu đề trường -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- Ô chỉ đọc (auto-fill) -->
+        <Style x:Key="ReadOnlyBox" TargetType="TextBox">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="Foreground" Value="#111827"/>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ===================== HEADER ===================== -->
+            <Border Grid.Row="0"
+                    BorderBrush="#E5E7EB"
+                    BorderThickness="0,0,0,1"
+                    Padding="20,15">
+                <Grid>
+                    <TextBlock Text="Lập hóa đơn thanh toán"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <Button Content="✕"
+                            HorizontalAlignment="Right"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="16"
+                            Foreground="#6B7280"
+                            Cursor="Hand"
+                            Command="{Binding ThoatCommand}"/>
+                </Grid>
+            </Border>
+
+            <!-- ===================== NỘI DUNG ===================== -->
+            <Grid Grid.Row="1" Margin="20,15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- 0: Mã phiếu | Họ tên -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 1: Ngày khám | Loại phòng khám -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 2: Tiền khám | Tiền thuốc -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 3: Tổng tiền -->
+                    <RowDefinition Height="*"/>
+                    <!-- 4: đệm -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- 5: nút bấm -->
+                </Grid.RowDefinitions>
+
+                <!-- =========== HÀNG 1: Mã phiếu khám bệnh | Họ tên bệnh nhân =========== -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Mã phiếu khám bệnh" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Height="32"
+                                  ItemsSource="{Binding DanhSachPhieu}"
+                                  SelectedItem="{Binding PhieuDuocChon}"
+                                  DisplayMemberPath="MaPhieuKhamBenh"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Họ tên bệnh nhân" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding HoTenBenhNhan}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- =========== HÀNG 2: Ngày khám | Loại phòng khám =========== -->
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Ngày khám" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding NgayKhamStr}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Loại phòng khám" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding TenLoaiPhongKham}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- =========== HÀNG 3: Tiền khám | Tiền thuốc =========== -->
+                <Grid Grid.Row="2" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Tiền khám" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding TienKhamStr}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Tiền thuốc" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 Text="{Binding TienThuocStr}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- =========== HÀNG 4: Tổng tiền =========== -->
+                <Grid Grid.Row="3" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Tổng tiền" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource ReadOnlyBox}"
+                                 FontWeight="SemiBold"
+                                 Text="{Binding TongTienStr}"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- =========== HÀNG NÚT BẤM (3 nút đều nhau) =========== -->
+                <Grid Grid.Row="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Lập hóa đơn"
+                            Style="{StaticResource BlueButton}"
+                            Width="160" HorizontalAlignment="Center"
+                            Command="{Binding LapHoaDonCommand}"/>
+
+                    <Button Grid.Column="1" Content="Tìm phiếu khám bệnh"
+                            Style="{StaticResource BlueButton}"
+                            Width="160" HorizontalAlignment="Center"
+                            Command="{Binding TimPhieuCommand}"/>
+
+                    <Button Grid.Column="2" Content="Thoát"
+                            Style="{StaticResource BlueButton}"
+                            Width="160" HorizontalAlignment="Center"
+                            Command="{Binding ThoatCommand}"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

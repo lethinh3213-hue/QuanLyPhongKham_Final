@@ -1,0 +1,144 @@
+﻿<Window x:Class="QuanLyPhongKham.Views.LapBaoCaoHoaDonView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Lập báo cáo hóa đơn theo tháng"
+        Height="520" Width="820"
+        WindowStartupLocation="CenterScreen"
+        Background="White"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="BlueButton" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Margin="10">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <Border Grid.Row="0" BorderBrush="#E5E7EB" BorderThickness="0,0,0,1" Padding="20,15">
+                <Grid>
+                    <TextBlock Text="Lập báo cáo hóa đơn theo tháng"
+                               FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="✕" HorizontalAlignment="Right" Background="Transparent"
+                            BorderThickness="0" FontSize="16" Foreground="#6B7280" Cursor="Hand"
+                            Command="{Binding ThoatCommand}"/>
+                </Grid>
+            </Border>
+
+            <!-- NỘI DUNG -->
+            <Grid Grid.Row="1" Margin="20,15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- hàng nhập -->
+                    <RowDefinition Height="*"/>
+                    <!-- bảng -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- nút -->
+                </Grid.RowDefinitions>
+
+                <!-- HÀNG NHẬP: Năm | Tháng | Loại phòng khám -->
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Năm lập báo cáo" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Height="32"
+                                  ItemsSource="{Binding DanhSachNam}"
+                                  SelectedItem="{Binding NamDuocChon}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="8,0,8,0">
+                        <TextBlock Text="Tháng lập báo cáo" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Height="32"
+                                  ItemsSource="{Binding DanhSachThang}"
+                                  SelectedItem="{Binding ThangDuocChon}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                        <TextBlock Text="Loại phòng khám" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox Height="32"
+                                  ItemsSource="{Binding DanhSachLoaiPhongKham}"
+                                  SelectedItem="{Binding LoaiPhongKhamDuocChon}"
+                                  DisplayMemberPath="TenLoaiPhongKham"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- BẢNG KẾT QUẢ -->
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding DanhSachKetQua}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="All"
+                          BorderBrush="#D1D5DB"
+                          BorderThickness="1"
+                          RowHeaderWidth="0"
+                          Margin="0,0,0,14">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="STT"
+                                            Binding="{Binding STT}" Width="50"/>
+                        <DataGridTextColumn Header="Ngày"
+                                            Binding="{Binding Ngay, StringFormat=dd/MM/yyyy}" Width="130"/>
+                        <DataGridTextColumn Header="Số bệnh nhân"
+                                            Binding="{Binding SoBenhNhan}" Width="130"/>
+                        <DataGridTextColumn Header="Doanh thu"
+                                            Binding="{Binding DoanhThu, StringFormat={}{0:N0} VNĐ}" Width="*"/>
+                        <DataGridTextColumn Header="Tỉ lệ"
+                                            Binding="{Binding TiLe, StringFormat={}{0:0.0}%}" Width="100"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- NÚT -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Lập báo cáo"
+                            Style="{StaticResource BlueButton}"
+                            Width="150"
+                            Command="{Binding LapBaoCaoCommand}"/>
+
+                    <Button Grid.Column="2" Content="Thoát"
+                            Style="{StaticResource BlueButton}"
+                            Width="150"
+                            Command="{Binding ThoatCommand}"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

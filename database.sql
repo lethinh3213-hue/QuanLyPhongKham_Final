@@ -1,0 +1,308 @@
+-- Quản lý Phòng khám - cơ sở dữ liệu
+
+CREATE DATABASE IF NOT EXISTS QUANLYPHONGKHAM;
+USE QUANLYPHONGKHAM;
+
+-- Xóa bảng cũ nếu có
+DROP TABLE IF EXISTS HOADONTHANHTOAN;
+DROP TABLE IF EXISTS CTPHIEUKHAMBENH;
+DROP TABLE IF EXISTS PHIEUKHAMBENH;
+DROP TABLE IF EXISTS LOAITHUOC;
+DROP TABLE IF EXISTS DONVITINH;
+DROP TABLE IF EXISTS CACHDUNG;
+DROP TABLE IF EXISTS LOAIBENH;
+DROP TABLE IF EXISTS BENHNHAN;
+DROP TABLE IF EXISTS KHAMBENH;
+DROP TABLE IF EXISTS LOAIPHONGKHAM;
+
+CREATE TABLE LOAIPHONGKHAM (
+    MaLoaiPhongKham  VARCHAR(10)    PRIMARY KEY,
+    TenLoaiPhongKham VARCHAR(50)    NOT NULL,
+    SoLuongToiDa     INT            NOT NULL,
+    TienKham         DECIMAL(18,2)  NOT NULL DEFAULT 0
+);
+
+CREATE TABLE KHAMBENH (
+    MaKhamBenh      VARCHAR(30)  PRIMARY KEY,
+    NgayKham        DATE         NOT NULL,
+    MaLoaiPhongKham VARCHAR(10)  NOT NULL,
+    FOREIGN KEY (MaLoaiPhongKham) REFERENCES LOAIPHONGKHAM(MaLoaiPhongKham)
+);
+
+CREATE TABLE BENHNHAN (
+    MaBenhNhan VARCHAR(30)  PRIMARY KEY,
+    HoTen      VARCHAR(100) NOT NULL,
+    GioiTinh   VARCHAR(10)  NOT NULL,
+    NamSinh    INT          NOT NULL,
+    DiaChi     VARCHAR(200) NOT NULL,
+    MaKhamBenh VARCHAR(30)  NOT NULL,
+    FOREIGN KEY (MaKhamBenh) REFERENCES KHAMBENH(MaKhamBenh)
+);
+
+CREATE TABLE LOAIBENH (
+    MaLoaiBenh  VARCHAR(10)  PRIMARY KEY,
+    TenLoaiBenh VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE DONVITINH (
+    MaDonViTinh  VARCHAR(10) PRIMARY KEY,
+    TenDonViTinh VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE CACHDUNG (
+    MaCachDung  VARCHAR(10)  PRIMARY KEY,
+    TenCachDung VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE LOAITHUOC (
+    MaLoaiThuoc  VARCHAR(10)    PRIMARY KEY,
+    TenLoaiThuoc VARCHAR(100)   NOT NULL,
+    MaDonViTinh  VARCHAR(10)    NOT NULL,
+    MaCachDung   VARCHAR(10)    NOT NULL,
+    SoLuongTon   INT            NOT NULL,
+    DonGia       DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    FOREIGN KEY (MaDonViTinh) REFERENCES DONVITINH(MaDonViTinh),
+    FOREIGN KEY (MaCachDung)  REFERENCES CACHDUNG(MaCachDung)
+);
+
+CREATE TABLE PHIEUKHAMBENH (
+    MaPhieuKhamBenh VARCHAR(30)  PRIMARY KEY,
+    MaBenhNhan      VARCHAR(30)  NOT NULL,
+    TrieuChung      VARCHAR(200),
+    MaLoaiBenh      VARCHAR(10)  NOT NULL,
+    GhiChu          VARCHAR(200),
+    FOREIGN KEY (MaBenhNhan) REFERENCES BENHNHAN(MaBenhNhan),
+    FOREIGN KEY (MaLoaiBenh) REFERENCES LOAIBENH(MaLoaiBenh)
+);
+
+CREATE TABLE CTPHIEUKHAMBENH (
+    MaPhieuKhamBenh VARCHAR(30) NOT NULL,
+    MaThuoc         VARCHAR(10) NOT NULL,
+    SoLuong         INT         NOT NULL,
+    PRIMARY KEY (MaPhieuKhamBenh, MaThuoc),
+    FOREIGN KEY (MaPhieuKhamBenh) REFERENCES PHIEUKHAMBENH(MaPhieuKhamBenh),
+    FOREIGN KEY (MaThuoc) REFERENCES LOAITHUOC(MaLoaiThuoc)
+);
+
+CREATE TABLE HOADONTHANHTOAN (
+    MaHoaDon        VARCHAR(30)    PRIMARY KEY,
+    MaPhieuKhamBenh VARCHAR(30)    NOT NULL,
+    TienKham        DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    TienThuoc       DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    TongTien        DECIMAL(18,2)  NOT NULL DEFAULT 0,
+    UNIQUE KEY uq_phieu (MaPhieuKhamBenh),
+    FOREIGN KEY (MaPhieuKhamBenh) REFERENCES PHIEUKHAMBENH(MaPhieuKhamBenh)
+);
+
+-- Dữ liệu danh mục
+
+-- Loại phòng khám (QĐ4: Thường 100.000đ - VIP 200.000đ)
+INSERT INTO LOAIPHONGKHAM VALUES ('PK01', 'Phòng khám Thường', 40, 100000);
+INSERT INTO LOAIPHONGKHAM VALUES ('PK02', 'Phòng khám VIP',    20, 200000);
+
+-- Đơn vị tính
+INSERT INTO DONVITINH VALUES ('DV01', 'Viên');
+INSERT INTO DONVITINH VALUES ('DV02', 'Chai');
+
+-- Cách dùng
+INSERT INTO CACHDUNG VALUES ('CD01', 'Ngày 1 lần');
+INSERT INTO CACHDUNG VALUES ('CD02', 'Ngày 2 lần');
+INSERT INTO CACHDUNG VALUES ('CD03', 'Ngày 3 lần');
+INSERT INTO CACHDUNG VALUES ('CD04', 'Ngày 4 lần');
+
+-- 5 loại bệnh
+INSERT INTO LOAIBENH VALUES ('LB01', 'Cảm cúm');
+INSERT INTO LOAIBENH VALUES ('LB02', 'Viêm họng');
+INSERT INTO LOAIBENH VALUES ('LB03', 'Đau dạ dày');
+INSERT INTO LOAIBENH VALUES ('LB04', 'Sốt xuất huyết');
+INSERT INTO LOAIBENH VALUES ('LB05', 'Viêm phổi');
+
+-- 30 loại thuốc (cột cuối = DonGia: đơn giá / 1 đơn vị, VNĐ)
+INSERT INTO LOAITHUOC VALUES ('T01', 'Paracetamol',     'DV01', 'CD03', 200,  2000);
+INSERT INTO LOAITHUOC VALUES ('T02', 'Amoxicillin',     'DV01', 'CD02', 150,  3500);
+INSERT INTO LOAITHUOC VALUES ('T03', 'Vitamin C',       'DV01', 'CD01', 300,  1500);
+INSERT INTO LOAITHUOC VALUES ('T04', 'Ibuprofen',       'DV01', 'CD03', 180,  2500);
+INSERT INTO LOAITHUOC VALUES ('T05', 'Cetirizine',      'DV01', 'CD01', 120,  3000);
+INSERT INTO LOAITHUOC VALUES ('T06', 'Omeprazole',      'DV01', 'CD02', 100,  4000);
+INSERT INTO LOAITHUOC VALUES ('T07', 'Aspirin',         'DV01', 'CD03', 160,  1800);
+INSERT INTO LOAITHUOC VALUES ('T08', 'Loratadine',      'DV01', 'CD01', 140,  3200);
+INSERT INTO LOAITHUOC VALUES ('T09', 'Dextromethorphan','DV02', 'CD03', 80,  25000);
+INSERT INTO LOAITHUOC VALUES ('T10', 'Siro ho',         'DV02', 'CD03', 90,  30000);
+INSERT INTO LOAITHUOC VALUES ('T11', 'Berberin',        'DV01', 'CD02', 200,  1200);
+INSERT INTO LOAITHUOC VALUES ('T12', 'Smecta',          'DV01', 'CD03', 110,  5000);
+INSERT INTO LOAITHUOC VALUES ('T13', 'Oresol',          'DV02', 'CD04', 130,  8000);
+INSERT INTO LOAITHUOC VALUES ('T14', 'Efferalgan',      'DV01', 'CD03', 170,  2800);
+INSERT INTO LOAITHUOC VALUES ('T15', 'Azithromycin',    'DV01', 'CD01', 95,   6000);
+INSERT INTO LOAITHUOC VALUES ('T16', 'Cephalexin',      'DV01', 'CD02', 105,  4500);
+INSERT INTO LOAITHUOC VALUES ('T17', 'Diclofenac',      'DV01', 'CD02', 115,  3300);
+INSERT INTO LOAITHUOC VALUES ('T18', 'Salbutamol',      'DV02', 'CD03', 70,  45000);
+INSERT INTO LOAITHUOC VALUES ('T19', 'Metformin',       'DV01', 'CD02', 125,  2200);
+INSERT INTO LOAITHUOC VALUES ('T20', 'Ambroxol',        'DV01', 'CD03', 135,  2600);
+INSERT INTO LOAITHUOC VALUES ('T21', 'Loperamide',      'DV01', 'CD03', 100,  3100);
+INSERT INTO LOAITHUOC VALUES ('T22', 'Ranitidine',      'DV01', 'CD02', 90,   2900);
+INSERT INTO LOAITHUOC VALUES ('T23', 'Prednisolone',    'DV01', 'CD01', 85,   3800);
+INSERT INTO LOAITHUOC VALUES ('T24', 'Clarithromycin',  'DV01', 'CD02', 75,   7000);
+INSERT INTO LOAITHUOC VALUES ('T25', 'Naproxen',        'DV01', 'CD02', 110,  3400);
+INSERT INTO LOAITHUOC VALUES ('T26', 'Domperidone',     'DV01', 'CD03', 120,  2700);
+INSERT INTO LOAITHUOC VALUES ('T27', 'Bromhexin',       'DV01', 'CD03', 130,  2100);
+INSERT INTO LOAITHUOC VALUES ('T28', 'Theophylline',    'DV01', 'CD02', 65,   4200);
+INSERT INTO LOAITHUOC VALUES ('T29', 'Multivitamin',    'DV01', 'CD01', 250,  1900);
+INSERT INTO LOAITHUOC VALUES ('T30', 'Nước muối sinh lý','DV02','CD04', 140, 12000);
+
+-- Dữ liệu khám bệnh + bệnh nhân
+
+-- Ngày 01/05/2026
+INSERT INTO KHAMBENH VALUES ('KB001', '2026-05-01', 'PK01');
+INSERT INTO KHAMBENH VALUES ('KB002', '2026-05-01', 'PK02');
+
+INSERT INTO BENHNHAN VALUES ('BN001', 'Nguyễn Văn An',    'Nam', 1990, 'Quận 1, TP.HCM',       'KB001');
+INSERT INTO BENHNHAN VALUES ('BN002', 'Trần Thị Bình',    'Nữ',  1995, 'Quận 3, TP.HCM',       'KB001');
+INSERT INTO BENHNHAN VALUES ('BN003', 'Lê Văn Cường',     'Nam', 1988, 'Bình Thạnh, TP.HCM',   'KB001');
+INSERT INTO BENHNHAN VALUES ('BN004', 'Phạm Thị Dung',    'Nữ',  2000, 'Quận 7, TP.HCM',       'KB002');
+INSERT INTO BENHNHAN VALUES ('BN005', 'Hoàng Văn Em',     'Nam', 1975, 'Thủ Đức, TP.HCM',      'KB002');
+
+-- Ngày 10/05/2026
+INSERT INTO KHAMBENH VALUES ('KB003', '2026-05-10', 'PK01');
+INSERT INTO KHAMBENH VALUES ('KB004', '2026-05-10', 'PK02');
+
+INSERT INTO BENHNHAN VALUES ('BN006', 'Vũ Thị Phượng',    'Nữ',  1992, 'Tân Bình, TP.HCM',     'KB003');
+INSERT INTO BENHNHAN VALUES ('BN007', 'Đỗ Văn Giang',     'Nam', 1985, 'Gò Vấp, TP.HCM',       'KB003');
+INSERT INTO BENHNHAN VALUES ('BN008', 'Bùi Thị Hằng',     'Nữ',  1998, 'Quận 10, TP.HCM',      'KB003');
+INSERT INTO BENHNHAN VALUES ('BN009', 'Ngô Văn Inh',      'Nam', 1980, 'Phú Nhuận, TP.HCM',    'KB004');
+INSERT INTO BENHNHAN VALUES ('BN010', 'Trịnh Thị Kim',    'Nữ',  1993, 'Quận 5, TP.HCM',       'KB004');
+
+-- Ngày 15/05/2026
+INSERT INTO KHAMBENH VALUES ('KB005', '2026-05-15', 'PK01');
+INSERT INTO KHAMBENH VALUES ('KB006', '2026-05-15', 'PK02');
+
+INSERT INTO BENHNHAN VALUES ('BN011', 'Lý Văn Long',      'Nam', 1991, 'Quận 4, TP.HCM',       'KB005');
+INSERT INTO BENHNHAN VALUES ('BN012', 'Hà Thị Mai',       'Nữ',  1996, 'Quận 6, TP.HCM',       'KB005');
+INSERT INTO BENHNHAN VALUES ('BN013', 'Phan Văn Nam',     'Nam', 1989, 'Quận 8, TP.HCM',       'KB005');
+INSERT INTO BENHNHAN VALUES ('BN014', 'Đặng Thị Oanh',    'Nữ',  2001, 'Bình Tân, TP.HCM',     'KB005');
+INSERT INTO BENHNHAN VALUES ('BN015', 'Mai Văn Phúc',     'Nam', 1978, 'Quận 11, TP.HCM',      'KB006');
+INSERT INTO BENHNHAN VALUES ('BN016', 'Tạ Thị Quỳnh',     'Nữ',  1994, 'Quận 12, TP.HCM',      'KB006');
+
+-- Ngày 17/05/2026
+INSERT INTO KHAMBENH VALUES ('KB007', '2026-05-17', 'PK01');
+INSERT INTO KHAMBENH VALUES ('KB008', '2026-05-17', 'PK02');
+
+INSERT INTO BENHNHAN VALUES ('BN017', 'Hồ Văn Sơn',       'Nam', 1987, 'Hóc Môn, TP.HCM',      'KB007');
+INSERT INTO BENHNHAN VALUES ('BN018', 'Lương Thị Tâm',    'Nữ',  1992, 'Củ Chi, TP.HCM',       'KB007');
+INSERT INTO BENHNHAN VALUES ('BN019', 'Cao Văn Uy',       'Nam', 1995, 'Quận 2, TP.HCM',       'KB007');
+INSERT INTO BENHNHAN VALUES ('BN020', 'Văn Thị Vân',      'Nữ',  1999, 'Nhà Bè, TP.HCM',       'KB007');
+INSERT INTO BENHNHAN VALUES ('BN021', 'Triệu Văn Xuân',   'Nam', 1983, 'Bình Chánh, TP.HCM',   'KB008');
+INSERT INTO BENHNHAN VALUES ('BN022', 'Quách Thị Yến',    'Nữ',  1997, 'Quận 9, TP.HCM',       'KB008');
+
+-- Ngày 20/05/2026
+INSERT INTO KHAMBENH VALUES ('KB009', '2026-05-20', 'PK01');
+INSERT INTO KHAMBENH VALUES ('KB010', '2026-05-20', 'PK02');
+
+INSERT INTO BENHNHAN VALUES ('BN023', 'Nguyễn Văn Z',     'Nam', 1990, 'Quận 1, TP.HCM',       'KB009');
+INSERT INTO BENHNHAN VALUES ('BN024', 'Trần Thị Anh',     'Nữ',  1993, 'Quận 3, TP.HCM',       'KB009');
+INSERT INTO BENHNHAN VALUES ('BN025', 'Lê Văn Bình',      'Nam', 1986, 'Bình Thạnh, TP.HCM',   'KB009');
+INSERT INTO BENHNHAN VALUES ('BN026', 'Phạm Thị Châu',    'Nữ',  2002, 'Quận 7, TP.HCM',       'KB010');
+INSERT INTO BENHNHAN VALUES ('BN027', 'Hoàng Văn Dũng',   'Nam', 1976, 'Thủ Đức, TP.HCM',      'KB010');
+INSERT INTO BENHNHAN VALUES ('BN028', 'Vũ Thị Em',        'Nữ',  1994, 'Tân Bình, TP.HCM',     'KB010');
+
+-- Dữ liệu phiếu khám bệnh
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB001', 'BN001', 'Sốt nhẹ, ho khan',           'LB01', 'Uống nhiều nước');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB002', 'BN002', 'Đau họng, khàn tiếng',       'LB02', 'Tránh đồ lạnh');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB003', 'BN003', 'Đau bụng âm ỉ vùng thượng vị','LB03', 'Ăn nhẹ, đúng giờ');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB004', 'BN004', 'Sốt cao, đau đầu',           'LB04', 'Theo dõi 3 ngày');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB005', 'BN005', 'Ho có đờm, khó thở',         'LB05', 'Tái khám sau 1 tuần');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB006', 'BN006', 'Hắt hơi, sổ mũi',            'LB01', 'Nghỉ ngơi đầy đủ');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB007', 'BN008', 'Đau rát họng',               'LB02', '');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB008', 'BN010', 'Ợ chua, đầy bụng',           'LB03', 'Tránh đồ chua, cay');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB009', 'BN011', 'Sốt 39 độ, đau khớp',        'LB04', 'Cần xét nghiệm máu');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB010', 'BN014', 'Cảm lạnh, mệt mỏi',          'LB01', '');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB011', 'BN016', 'Sốt nhẹ, ho',                'LB02', 'Súc miệng nước muối');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB012', 'BN017', 'Khó thở khi nằm',            'LB05', 'Chụp X-quang phổi');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB013', 'BN020', 'Buồn nôn, đau dạ dày',       'LB03', 'Ăn cháo loãng');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB014', 'BN023', 'Ho, đau đầu, mệt',           'LB01', '');
+INSERT INTO PHIEUKHAMBENH VALUES ('PKB015', 'BN026', 'Sốt cao, phát ban',          'LB04', 'Theo dõi tiểu cầu');
+
+-- Chi tiết phiếu khám (thuốc kê đơn)
+
+-- PKB001 - Cảm cúm
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB001', 'T01', 10);  -- Paracetamol
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB001', 'T03', 20);  -- Vitamin C
+
+-- PKB002 - Viêm họng
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB002', 'T02', 14);  -- Amoxicillin
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB002', 'T20', 14);  -- Ambroxol
+
+-- PKB003 - Đau dạ dày
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB003', 'T06', 20);  -- Omeprazole
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB003', 'T11', 15);  -- Berberin
+
+-- PKB004 - Sốt xuất huyết
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB004', 'T01', 15);  -- Paracetamol
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB004', 'T13', 5);   -- Oresol
+
+-- PKB005 - Viêm phổi
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB005', 'T15', 6);   -- Azithromycin
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB005', 'T10', 2);   -- Siro ho
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB005', 'T18', 3);   -- Salbutamol
+
+-- PKB006 - Cảm cúm
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB006', 'T01', 9);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB006', 'T05', 7);   -- Cetirizine
+
+-- PKB007 - KHÔNG kê thuốc (demo Tiền thuốc = 0)
+
+-- PKB008 - Đau dạ dày
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB008', 'T12', 12);  -- Smecta
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB008', 'T22', 14);  -- Ranitidine
+
+-- PKB009 - Sốt xuất huyết
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB009', 'T01', 20);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB009', 'T13', 8);
+
+-- PKB010 - Cảm cúm
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB010', 'T01', 12);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB010', 'T03', 15);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB010', 'T29', 10); -- Multivitamin
+
+-- PKB011 - Viêm họng
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB011', 'T02', 14);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB011', 'T30', 1);  -- Nước muối sinh lý
+
+-- PKB012 - Viêm phổi
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB012', 'T16', 10); -- Cephalexin
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB012', 'T20', 21);
+
+-- PKB013 - Đau dạ dày
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB013', 'T06', 14);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB013', 'T26', 10); -- Domperidone
+
+-- PKB014 - Cảm cúm
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB014', 'T01', 10);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB014', 'T04', 6);  -- Ibuprofen
+
+-- PKB015 - Sốt xuất huyết
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB015', 'T01', 18);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB015', 'T13', 10);
+INSERT INTO CTPHIEUKHAMBENH VALUES ('PKB015', 'T29', 14);
+
+-- Hóa đơn thanh toán (dữ liệu mẫu để báo cáo có số)
+INSERT INTO HOADONTHANHTOAN (MaHoaDon, MaPhieuKhamBenh, TienKham, TienThuoc, TongTien)
+SELECT CONCAT('HD', LPAD(ROW_NUMBER() OVER (ORDER BY pkb.MaPhieuKhamBenh), 3, '0')),
+       pkb.MaPhieuKhamBenh,
+       lpk.TienKham,
+       IFNULL(t.TienThuoc, 0),
+       lpk.TienKham + IFNULL(t.TienThuoc, 0)
+FROM PHIEUKHAMBENH pkb
+INNER JOIN BENHNHAN       bn  ON pkb.MaBenhNhan      = bn.MaBenhNhan
+INNER JOIN KHAMBENH       kb  ON bn.MaKhamBenh       = kb.MaKhamBenh
+INNER JOIN LOAIPHONGKHAM  lpk ON kb.MaLoaiPhongKham  = lpk.MaLoaiPhongKham
+LEFT JOIN (
+    SELECT ct.MaPhieuKhamBenh, SUM(ct.SoLuong * lt.DonGia) AS TienThuoc
+    FROM CTPHIEUKHAMBENH ct
+    INNER JOIN LOAITHUOC lt ON ct.MaThuoc = lt.MaLoaiThuoc
+    GROUP BY ct.MaPhieuKhamBenh
+) t ON pkb.MaPhieuKhamBenh = t.MaPhieuKhamBenh;
+
+-- Kiểm tra
+SELECT COUNT(*) AS 'Tổng phiếu khám bệnh' FROM PHIEUKHAMBENH;
+SELECT COUNT(*) AS 'Tổng dòng chi tiết'   FROM CTPHIEUKHAMBENH;
+SELECT MaLoaiPhongKham, TenLoaiPhongKham, TienKham FROM LOAIPHONGKHAM;

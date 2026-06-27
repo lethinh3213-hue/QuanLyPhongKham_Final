@@ -1,0 +1,76 @@
+<Window x:Class="QuanLyPhongKham.Views.TimKiemDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tìm kiếm bệnh nhân"
+        Width="440"
+        Height="240"
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Style nút bo tròn -->
+        <Style x:Key="RoundButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Margin="10">
+        <StackPanel Margin="24,20,24,20">
+
+            <!-- Tiêu đề -->
+            <TextBlock Text="Nhập họ tên cần tìm:"
+                       FontSize="14"
+                       Foreground="#374151"
+                       Margin="0,0,0,12"/>
+
+            <!-- Ô nhập -->
+            <TextBox x:Name="txtTuKhoa"
+                     Height="38"
+                     FontSize="13"
+                     Padding="10,0"
+                     VerticalContentAlignment="Center"
+                     Margin="0,0,0,24"/>
+
+            <!-- 2 nút -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0"
+                        Content="Tìm"
+                        Style="{StaticResource RoundButton}"
+                        Background="#3B82F6"
+                        Margin="0,0,6,0"
+                        Click="BtnTim_Click"
+                        IsDefault="True"/>
+
+                <Button Grid.Column="1"
+                        Content="Hủy"
+                        Style="{StaticResource RoundButton}"
+                        Background="#6B7280"
+                        Margin="6,0,0,0"
+                        Click="BtnHuy_Click"
+                        IsCancel="True"/>
+            </Grid>
+
+        </StackPanel>
+    </Border>
+</Window>
