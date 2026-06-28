@@ -121,6 +121,37 @@ namespace QuanLyPhongKham.Repositories
             return ds;
         }
 
+        public bool CapNhatBenhNhan(BenhNhan bn)
+        {
+            try
+            {
+                using var conn = db.GetConnection();
+                conn.Open();
+
+                string sql = @"UPDATE BENHNHAN
+                       SET HoTen = @HoTen,
+                           GioiTinh = @GioiTinh,
+                           NamSinh = @NamSinh,
+                           DiaChi = @DiaChi
+                       WHERE MaBenhNhan = @MaBenhNhan";
+
+                using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@HoTen", bn.HoTen);
+                cmd.Parameters.AddWithValue("@GioiTinh", bn.GioiTinh);
+                cmd.Parameters.AddWithValue("@NamSinh", bn.NamSinh);
+                cmd.Parameters.AddWithValue("@DiaChi", bn.DiaChi);
+                cmd.Parameters.AddWithValue("@MaBenhNhan", bn.MaBenhNhan);
+
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật bệnh nhân: " + ex.Message, "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
         // Tra cứu bệnh nhân theo các tiêu chí lọc
         public List<KetQuaTraCuuBenhNhan> TraCuu(TieuChiTraCuu tc)
         {

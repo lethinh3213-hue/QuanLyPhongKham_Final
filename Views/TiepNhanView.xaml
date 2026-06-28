@@ -154,13 +154,13 @@
                     <Button Grid.Column="1" Content="Thêm bệnh nhân"
                             Style="{StaticResource BlueButton}"
                             Command="{Binding ThemBenhNhanCommand}" Margin="5,0,5,0"/>
-                    <Button Grid.Column="2" Content="Tìm kiếm bệnh nhân"
+                    <Button Grid.Column="2" Content="Tìm kiếm "
                             Style="{StaticResource BlueButton}"
                             Command="{Binding TimKiemCommand}" Margin="5,0,5,0"/>
                     <Button Grid.Column="3" Content="Xóa bệnh nhân"
                             Style="{StaticResource BlueButton}"
                             Command="{Binding XoaCommand}" Margin="5,0,5,0"/>
-                    <Button Grid.Column="4" Content="Cập nhật bệnh nhân"
+                    <Button Grid.Column="4" Content="Cập nhật"
                             Style="{StaticResource BlueButton}"
                             Command="{Binding CapNhatCommand}" Margin="5,0,5,0"/>
                     <Button Grid.Column="5" Content="Thoát"

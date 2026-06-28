@@ -7,6 +7,15 @@ using QuanLyPhongKham.Repositories;
 
 namespace QuanLyPhongKham.ViewModels
 {
+    public partial class BenhNhanDto : ObservableObject
+    {
+        [ObservableProperty] private string maBenhNhan = string.Empty;
+        [ObservableProperty] private int sTT;
+        [ObservableProperty] private string hoTen = string.Empty;
+        [ObservableProperty] private string gioiTinh = string.Empty;
+        [ObservableProperty] private string namSinh = string.Empty;
+        [ObservableProperty] private string diaChi = string.Empty;
+    }
     public partial class TiepNhanViewModel : ObservableObject
     {
         // REPOSITORIES
@@ -229,47 +238,79 @@ namespace QuanLyPhongKham.ViewModels
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(BenhNhanDuocChon.MaBenhNhan))
+            {
+                MessageBox.Show("Dòng này chưa có trong CSDL. Hãy bấm 'Tiếp nhận danh sách' để lưu mới.",
+                    "Thông báo", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(BenhNhanDuocChon.NamSinh, out int namSinh))
+            {
+                MessageBox.Show("Năm sinh không hợp lệ!", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var bn = new BenhNhan
+            {
+                MaBenhNhan = BenhNhanDuocChon.MaBenhNhan,
+                HoTen = BenhNhanDuocChon.HoTen,
+                GioiTinh = BenhNhanDuocChon.GioiTinh,
+                NamSinh = namSinh,
+                DiaChi = BenhNhanDuocChon.DiaChi
+            };
+
+            bool ok = _benhNhanRepo.CapNhatBenhNhan(bn);
+
             MessageBox.Show(
-                $"Thông tin dòng {BenhNhanDuocChon.STT} đã được cập nhật trên form.\nBấm 'Tiếp nhận danh sách' để lưu xuống database.",
-                "Cập nhật", MessageBoxButton.OK, MessageBoxImage.Information);
+                ok ? "Cập nhật bệnh nhân thành công!" : "Cập nhật thất bại!",
+                ok ? "Thành công" : "Lỗi",
+                MessageBoxButton.OK,
+                ok ? MessageBoxImage.Information : MessageBoxImage.Error);
         }
 
         [RelayCommand]
         private void TimKiem()
         {
-            var dialog = new Views.TimKiemDialog
+            if (LoaiPhongKhamDuocChon == null)
             {
-                Owner = Application.Current.MainWindow
-            };
-
-            bool? ketQua = dialog.ShowDialog();
-
-            if (ketQua != true) return;
-
-            string tuKhoa = dialog.TuKhoa;
-
-            if (string.IsNullOrWhiteSpace(tuKhoa))
-            {
-                MessageBox.Show("Vui lòng nhập từ khóa!", "Thông báo",
+                MessageBox.Show("Vui lòng chọn tên phòng khám!", "Thông báo",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var bnTimThay = DanhSachBenhNhan.FirstOrDefault(bn =>
-                !string.IsNullOrEmpty(bn.HoTen) &&
-                bn.HoTen.Contains(tuKhoa, StringComparison.OrdinalIgnoreCase));
+            var ds = _benhNhanRepo.GetByNgayVaLoaiPhongKham(
+                NgayKham.Date,
+                LoaiPhongKhamDuocChon.MaLoaiPhongKham);
 
-            if (bnTimThay == null)
+            DanhSachBenhNhan.Clear();
+            BenhNhanDuocChon = null;
+
+            if (ds.Count == 0)
             {
-                MessageBox.Show($"Không tìm thấy bệnh nhân với từ khóa: \"{tuKhoa}\"", "Kết quả",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    $"Không có bệnh nhân cho ngày {NgayKham:dd/MM/yyyy} - {LoaiPhongKhamDuocChon.TenLoaiPhongKham}.",
+                    "Kết quả", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            BenhNhanDuocChon = bnTimThay;
+            for (int i = 0; i < ds.Count; i++)
+            {
+                var bn = ds[i];
+                DanhSachBenhNhan.Add(new BenhNhanDto
+                {
+                    MaBenhNhan = bn.MaBenhNhan,
+                    STT = i + 1,
+                    HoTen = bn.HoTen,
+                    GioiTinh = bn.GioiTinh,
+                    NamSinh = bn.NamSinh.ToString(),
+                    DiaChi = bn.DiaChi
+                });
+            }
 
             MessageBox.Show(
-                $"Tìm thấy bệnh nhân ở dòng {bnTimThay.STT}:\n\"{bnTimThay.HoTen}\"",
+                $"Đã tìm thấy {ds.Count} bệnh nhân cho ngày {NgayKham:dd/MM/yyyy} - {LoaiPhongKhamDuocChon.TenLoaiPhongKham}.",
                 "Kết quả", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -294,12 +335,4 @@ namespace QuanLyPhongKham.ViewModels
         }
     }
 
-    public partial class BenhNhanDto : ObservableObject
-    {
-        [ObservableProperty] private int sTT;
-        [ObservableProperty] private string hoTen = string.Empty;
-        [ObservableProperty] private string gioiTinh = string.Empty;
-        [ObservableProperty] private string namSinh = string.Empty;
-        [ObservableProperty] private string diaChi = string.Empty;
-    }
 }
