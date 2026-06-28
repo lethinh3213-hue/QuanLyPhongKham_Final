@@ -32,6 +32,9 @@ namespace QuanLyPhongKham.ViewModels
         [ObservableProperty] private string tienThuocStr = string.Empty;
         [ObservableProperty] private string tongTienStr = string.Empty;
 
+        // Lưu kết quả tính toán để dùng khi lập hóa đơn
+        private KetQuaHoaDon? ketQuaTinh = null;
+
         //  CONSTRUCTOR 
         public LapHoaDonThanhToanViewModel()
         {
@@ -43,12 +46,13 @@ namespace QuanLyPhongKham.ViewModels
             DanhSachPhieu = new ObservableCollection<PhieuKhamBenhItem>(_phieuRepo.GetAll());
         }
 
-        // Khi chọn 1 Mã phiếu khám bệnh -> tự điền thông tin mô tả, xóa các ô tiền cũ.
+        // Khi chọn 1 Mã phiếu khám bệnh → Tính tiền và hiển thị ngay
         partial void OnPhieuDuocChonChanged(PhieuKhamBenhItem? value)
         {
             if (value == null)
             {
                 XoaTrang();
+                ketQuaTinh = null;
                 return;
             }
 
@@ -56,10 +60,24 @@ namespace QuanLyPhongKham.ViewModels
             NgayKhamStr = value.NgayKham.ToString("dd/MM/yyyy");
             TenLoaiPhongKham = value.TenLoaiPhongKham;
 
-            // Tiền chỉ hiện ra sau khi bấm "Lập hóa đơn"
-            TienKhamStr = string.Empty;
-            TienThuocStr = string.Empty;
-            TongTienStr = string.Empty;
+            // Tính hóa đơn ngay khi chọn phiếu
+            string maPhieu = value.MaPhieuKhamBenh;
+            ketQuaTinh = _hoaDonRepo.TinhHoaDon(maPhieu);
+
+            if (ketQuaTinh != null)
+            {
+                // Hiển thị tiền trên form
+                TienKhamStr = DinhDangTien(ketQuaTinh.TienKham);
+                TienThuocStr = DinhDangTien(ketQuaTinh.TienThuoc);
+                TongTienStr = DinhDangTien(ketQuaTinh.TongTien);
+            }
+            else
+            {
+                // Nếu lỗi thì xóa rỗng các trường tiền
+                TienKhamStr = string.Empty;
+                TienThuocStr = string.Empty;
+                TongTienStr = string.Empty;
+            }
         }
 
         private void XoaTrang()
@@ -72,7 +90,7 @@ namespace QuanLyPhongKham.ViewModels
             TongTienStr = string.Empty;
         }
 
-        //  COMMAND: LẬP HÓA ĐƠN (nút xử lý nghiệp vụ) 
+        //  COMMAND: LẬP HÓA ĐƠN (nút lưu vào CSDL) 
         [RelayCommand]
         private void LapHoaDon()
         {
@@ -83,40 +101,26 @@ namespace QuanLyPhongKham.ViewModels
                 return;
             }
 
-            string maPhieu = PhieuDuocChon.MaPhieuKhamBenh;
-
-            // Bước 01..10: tính hóa đơn
-            var kq = _hoaDonRepo.TinhHoaDon(maPhieu);
-
-            // Bước 03: mã phiếu không tồn tại trong CSDL
-            if (kq == null)
+            if (ketQuaTinh == null)
             {
-                MessageBox.Show("Mã phiếu khám bệnh không tồn tại trong hệ thống.",
-                    "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vui lòng chọn phiếu khám bệnh hợp lệ.",
+                    "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Đổ kết quả lên màn hình
-            HoTenBenhNhan = kq.HoTenBenhNhan;
-            NgayKhamStr = kq.NgayKham.ToString("dd/MM/yyyy");
-            TenLoaiPhongKham = kq.TenLoaiPhongKham;
-            TienKhamStr = DinhDangTien(kq.TienKham);
-            TienThuocStr = DinhDangTien(kq.TienThuoc);
-            TongTienStr = DinhDangTien(kq.TongTien);
-
-            // Bước 11: lưu xuống CSDL Hóa đơn thanh toán
+            // Lưu hóa đơn xuống CSDL
             var hd = new HoaDonThanhToan
             {
-                MaPhieuKhamBenh = maPhieu,
-                TienKham = kq.TienKham,
-                TienThuoc = kq.TienThuoc,
-                TongTien = kq.TongTien
+                MaPhieuKhamBenh = PhieuDuocChon.MaPhieuKhamBenh,
+                TienKham = ketQuaTinh.TienKham,
+                TienThuoc = ketQuaTinh.TienThuoc,
+                TongTien = ketQuaTinh.TongTien
             };
             string maHoaDon = _hoaDonRepo.LuuHoaDon(hd);
 
             if (!string.IsNullOrEmpty(maHoaDon))
             {
-                string ghiChuThuoc = kq.CoDungThuoc ? "" : "\n(Phiếu này không kê thuốc nên Tiền thuốc = 0)";
+                string ghiChuThuoc = ketQuaTinh.CoDungThuoc ? "" : "\n(Phiếu này không kê thuốc nên Tiền thuốc = 0)";
                 MessageBox.Show(
                     $"Lập hóa đơn thành công!\n\n" +
                     $"Mã hóa đơn: {maHoaDon}\n" +
@@ -124,6 +128,11 @@ namespace QuanLyPhongKham.ViewModels
                     $"Tiền thuốc: {TienThuocStr}\n" +
                     $"Tổng tiền: {TongTienStr}{ghiChuThuoc}",
                     "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show("Lỗi lưu hóa đơn. Vui lòng thử lại.",
+                    "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
