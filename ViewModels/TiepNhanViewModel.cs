@@ -88,7 +88,7 @@ namespace QuanLyPhongKham.ViewModels
                 return false;
             }
 
-            int daCoTrongNgay = _khamBenhRepo.DemSoBenhNhanTrongNgay(NgayKham,LoaiPhongKhamDuocChon.MaLoaiPhongKham);
+            int daCoTrongNgay = _khamBenhRepo.DemSoBenhNhanTrongNgay(NgayKham, LoaiPhongKhamDuocChon.MaLoaiPhongKham);
             int dangNhapThem = DanhSachBenhNhan.Count;
             int tong = daCoTrongNgay + dangNhapThem;
             int soLuongToiDa = LoaiPhongKhamDuocChon.SoLuongToiDa;
@@ -159,6 +159,17 @@ namespace QuanLyPhongKham.ViewModels
         private void TiepNhan()
         {
             if (!KiemTraDuLieu()) return;
+
+            foreach (var dto in DanhSachBenhNhan)
+            {
+                int.TryParse(dto.NamSinh, out int nsKiemTra);
+                if (_benhNhanRepo.TonTai(dto.HoTen, nsKiemTra))
+                {
+                    MessageBox.Show($"Bệnh nhân \"{dto.HoTen}\" (năm sinh {dto.NamSinh}) đã có trong hệ thống.\nKhông thể tiếp nhận trùng.",
+                        "Trùng bệnh nhân", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
 
             string maKB = SinhMaKhamBenh();
             var khamBenh = new KhamBenh

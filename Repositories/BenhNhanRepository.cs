@@ -153,6 +153,30 @@ namespace QuanLyPhongKham.Repositories
         }
 
         // Tra cứu bệnh nhân theo các tiêu chí lọc
+        public bool TonTai(string hoTen, int namSinh)
+        {
+            try
+            {
+                using (MySqlConnection conn = db.GetConnection())
+                {
+                    conn.Open();
+                    string query = "SELECT COUNT(*) FROM BENHNHAN WHERE HoTen = @ten AND NamSinh = @ns";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@ten", hoTen);
+                        cmd.Parameters.AddWithValue("@ns", namSinh);
+                        return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kiểm tra trùng: " + ex.Message, "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+
         public List<KetQuaTraCuuBenhNhan> TraCuu(TieuChiTraCuu tc)
         {
             var ds = new List<KetQuaTraCuuBenhNhan>();
@@ -172,9 +196,7 @@ namespace QuanLyPhongKham.Repositories
                         IFNULL(pkb.TrieuChung, '')      AS TrieuChung,
                         IFNULL(pkb.GhiChu, '')          AS GhiChu,
                         IFNULL(lb.MaLoaiBenh, '')       AS MaLoaiBenh,
-                        IFNULL(lb.TenLoaiBenh, '')      AS TenLoaiBenh,
-                        IFNULL(ct.MaThuoc, '')          AS MaThuoc,
-                        IFNULL(lt.TenLoaiThuoc, '')     AS TenLoaiThuoc
+                        IFNULL(lb.TenLoaiBenh, '')      AS TenLoaiBenh
                     FROM BENHNHAN bn
                     INNER JOIN KHAMBENH       kb  ON bn.MaKhamBenh        = kb.MaKhamBenh
                     INNER JOIN LOAIPHONGKHAM  lpk ON kb.MaLoaiPhongKham   = lpk.MaLoaiPhongKham
@@ -302,9 +324,7 @@ namespace QuanLyPhongKham.Repositories
                         TrieuChung = reader.GetString("TrieuChung"),
                         GhiChu = reader.GetString("GhiChu"),
                         MaLoaiBenh = reader.GetString("MaLoaiBenh"),
-                        TenLoaiBenh = reader.GetString("TenLoaiBenh"),
-                        MaThuoc = reader.GetString("MaThuoc"),
-                        TenLoaiThuoc = reader.GetString("TenLoaiThuoc")
+                        TenLoaiBenh = reader.GetString("TenLoaiBenh")
                     });
                 }
             }
