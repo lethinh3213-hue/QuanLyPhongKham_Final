@@ -43,7 +43,9 @@ namespace QuanLyPhongKham.ViewModels
 
         private void NapDanhSachPhieu()
         {
-            DanhSachPhieu = new ObservableCollection<PhieuKhamBenhItem>(_phieuRepo.GetAll());
+            var danhSach = _phieuRepo.GetAll()
+                .Where(p => !_hoaDonRepo.DaCoHoaDon(p.MaPhieuKhamBenh));
+            DanhSachPhieu = new ObservableCollection<PhieuKhamBenhItem>(danhSach);
         }
 
         // Khi chọn 1 Mã phiếu khám bệnh → Tính tiền và hiển thị ngay
@@ -108,6 +110,15 @@ namespace QuanLyPhongKham.ViewModels
                 return;
             }
 
+            if (_hoaDonRepo.DaCoHoaDon(PhieuDuocChon.MaPhieuKhamBenh))
+            {
+                MessageBox.Show("Phiếu khám bệnh này đã có hóa đơn thanh toán, không thể lập thêm.",
+                    "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Warning);
+                NapDanhSachPhieu();
+                PhieuDuocChon = null;
+                return;
+            }
+
             // Lưu hóa đơn xuống CSDL
             var hd = new HoaDonThanhToan
             {
@@ -128,6 +139,11 @@ namespace QuanLyPhongKham.ViewModels
                     $"Tiền thuốc: {TienThuocStr}\n" +
                     $"Tổng tiền: {TongTienStr}{ghiChuThuoc}",
                     "Lập hóa đơn thanh toán", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                NapDanhSachPhieu();
+                PhieuDuocChon = null;
+                ketQuaTinh = null;
+                XoaTrang();
             }
             else
             {

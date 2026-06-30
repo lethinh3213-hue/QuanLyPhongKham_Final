@@ -134,6 +134,13 @@ namespace QuanLyPhongKham.ViewModels
         {
             if (!Validate()) return;
 
+            if (repoPhieu.DaCoPhieuKhamBenh(BenhNhanDuocChon!.MaBenhNhan))
+            {
+                MessageBox.Show("Bệnh nhân này đã có phiếu khám bệnh, không thể lập thêm.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var phieu = new PhieuKhamBenh
             {
                 MaPhieuKhamBenh = MaPhieuKhamBenh,

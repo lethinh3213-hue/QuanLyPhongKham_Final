@@ -59,11 +59,30 @@ namespace QuanLyPhongKham.ViewModels
         // Nạp các danh sách khi form được tải
         private void NapCacDanhSach()
         {
-            DanhSachLoaiPhongKham = new ObservableCollection<LoaiPhongKham>(_loaiPhongKhamRepo.GetAll());
-            DanhSachLoaiBenh = new ObservableCollection<LoaiBenh>(_loaiBenhRepo.GetAll());
-            DanhSachLoaiThuoc = new ObservableCollection<LoaiThuoc>(_loaiThuocRepo.GetAll());
-            DanhSachDonViTinh = new ObservableCollection<DonViTinh>(_donViTinhRepo.GetAll());
-            DanhSachCachDung = new ObservableCollection<CachDung>(_cachDungRepo.GetAll());
+            DanhSachLoaiPhongKham = new ObservableCollection<LoaiPhongKham>(
+                new[] { new LoaiPhongKham { MaLoaiPhongKham = string.Empty, TenLoaiPhongKham = "Tất cả" } }
+                    .Concat(_loaiPhongKhamRepo.GetAll()));
+            LoaiPhongKhamDuocChon = DanhSachLoaiPhongKham.FirstOrDefault();
+
+            DanhSachLoaiBenh = new ObservableCollection<LoaiBenh>(
+                new[] { new LoaiBenh { MaLoaiBenh = string.Empty, TenLoaiBenh = "Tất cả" } }
+                    .Concat(_loaiBenhRepo.GetAll()));
+            LoaiBenhDuocChon = DanhSachLoaiBenh.FirstOrDefault();
+
+            DanhSachLoaiThuoc = new ObservableCollection<LoaiThuoc>(
+                new[] { new LoaiThuoc { MaLoaiThuoc = string.Empty, TenLoaiThuoc = "Tất cả" } }
+                    .Concat(_loaiThuocRepo.GetAll()));
+            LoaiThuocDuocChon = DanhSachLoaiThuoc.FirstOrDefault();
+
+            DanhSachDonViTinh = new ObservableCollection<DonViTinh>(
+                new[] { new DonViTinh { MaDonViTinh = string.Empty, TenDonViTinh = "Tất cả" } }
+                    .Concat(_donViTinhRepo.GetAll()));
+            DonViTinhDuocChon = DanhSachDonViTinh.FirstOrDefault();
+
+            DanhSachCachDung = new ObservableCollection<CachDung>(
+                new[] { new CachDung { MaCachDung = string.Empty, TenCachDung = "Tất cả" } }
+                    .Concat(_cachDungRepo.GetAll()));
+            CachDungDuocChon = DanhSachCachDung.FirstOrDefault();
         }
 
         // Khi người dùng chọn Loại thuốc → tự động điền Đơn vị thuốc & Cách dùng

@@ -17,6 +17,10 @@ namespace QuanLyPhongKham.ViewModels
         private readonly LoaiThuocRepository _ltRepo = new();
 
         [ObservableProperty] private ObservableCollection<LoaiPhongKham> danhSachPhongKham = new();
+        [ObservableProperty] private LoaiPhongKham? phongKhamDuocChon;
+        [ObservableProperty] private string tenPhongKhamNhap = string.Empty;
+        [ObservableProperty] private string soLuongToiDaNhap = string.Empty;
+        [ObservableProperty] private string tienKhamNhap = string.Empty;
 
         [ObservableProperty] private ObservableCollection<LoaiBenh> danhSachLoaiBenh = new();
         [ObservableProperty] private LoaiBenh? loaiBenhDuocChon;
@@ -65,6 +69,20 @@ namespace QuanLyPhongKham.ViewModels
         {
             if (value != null) TenCachDungNhap = value.TenCachDung;
         }
+        partial void OnPhongKhamDuocChonChanged(LoaiPhongKham? value)
+        {
+            if (value == null)
+            {
+                TenPhongKhamNhap = string.Empty;
+                SoLuongToiDaNhap = string.Empty;
+                TienKhamNhap = string.Empty;
+                return;
+            }
+
+            TenPhongKhamNhap = value.TenLoaiPhongKham;
+            SoLuongToiDaNhap = value.SoLuongToiDa.ToString();
+            TienKhamNhap = ((long)value.TienKham).ToString();
+        }
         partial void OnThuocDuocChonChanged(LoaiThuoc? value)
         {
             if (value == null) return;
@@ -89,29 +107,108 @@ namespace QuanLyPhongKham.ViewModels
         }
 
         [RelayCommand]
-        private void LuuPhongKham()
+        private void ThemPhongKham()
         {
-            foreach (var pk in DanhSachPhongKham)
+            if (!KiemTraPhongKham(out int sl, out decimal tien)) return;
+
+            var pk = new LoaiPhongKham
             {
-                if (pk.SoLuongToiDa < 1)
-                {
-                    MessageBox.Show($"Số bệnh nhân tối đa của {pk.TenLoaiPhongKham} phải lớn hơn 0.",
-                        "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-                if (pk.TienKham < 0)
-                {
-                    MessageBox.Show($"Tiền khám của {pk.TenLoaiPhongKham} không hợp lệ.",
-                        "Lỗi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
+                TenLoaiPhongKham = TenPhongKhamNhap,
+                SoLuongToiDa = sl,
+                TienKham = tien
+            };
+
+            if (_lpkRepo.Them(pk))
+            {
+                NapPhongKham();
+                XoaFormPhongKham();
+                MessageBox.Show("Đã thêm loại phòng khám.", "Thành công",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        [RelayCommand]
+        private void SuaPhongKham()
+        {
+            if (PhongKhamDuocChon == null)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần sửa.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
-            foreach (var pk in DanhSachPhongKham)
-                _lpkRepo.CapNhat(pk);
+            if (!KiemTraPhongKham(out int sl, out decimal tien)) return;
 
-            MessageBox.Show("Đã lưu quy định phòng khám.", "Thành công",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var pk = new LoaiPhongKham
+            {
+                MaLoaiPhongKham = PhongKhamDuocChon.MaLoaiPhongKham,
+                TenLoaiPhongKham = TenPhongKhamNhap,
+                SoLuongToiDa = sl,
+                TienKham = tien
+            };
+
+            if (_lpkRepo.CapNhat(pk))
+            {
+                NapPhongKham();
+                MessageBox.Show("Đã sửa loại phòng khám.", "Thành công",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        [RelayCommand]
+        private void XoaPhongKham()
+        {
+            if (PhongKhamDuocChon == null)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần xóa.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_lpkRepo.Xoa(PhongKhamDuocChon.MaLoaiPhongKham))
+            {
+                NapPhongKham();
+                XoaFormPhongKham();
+                MessageBox.Show("Đã xóa loại phòng khám.", "Thành công",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private bool KiemTraPhongKham(out int sl, out decimal tien)
+        {
+            sl = 0;
+            tien = 0;
+
+            if (string.IsNullOrWhiteSpace(TenPhongKhamNhap))
+            {
+                MessageBox.Show("Vui lòng nhập tên phòng khám.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!int.TryParse(SoLuongToiDaNhap, out sl) || sl < 1)
+            {
+                MessageBox.Show("Số lượng tối đa phải lớn hơn 0.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!decimal.TryParse(TienKhamNhap, out tien) || tien < 0)
+            {
+                MessageBox.Show("Tiền khám không hợp lệ.", "Lỗi",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void XoaFormPhongKham()
+        {
+            PhongKhamDuocChon = null;
+            TenPhongKhamNhap = string.Empty;
+            SoLuongToiDaNhap = string.Empty;
+            TienKhamNhap = string.Empty;
         }
 
         [RelayCommand]

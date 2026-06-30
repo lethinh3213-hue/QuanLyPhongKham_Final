@@ -9,11 +9,36 @@ namespace QuanLyPhongKham.Repositories
     {
         private readonly DBHelper db = new DBHelper();
 
+        public bool DaCoPhieuKhamBenh(string maBenhNhan)
+        {
+            try
+            {
+                using var conn = db.GetConnection();
+                conn.Open();
+
+                string sql = "SELECT COUNT(*) FROM PHIEUKHAMBENH WHERE MaBenhNhan = @ma";
+                using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@ma", maBenhNhan);
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kiểm tra phiếu khám bệnh: " + ex.Message);
+                return false;
+            }
+        }
+
         // Lưu phiếu khám bệnh
         public bool ThemPhieuKhamBenh(PhieuKhamBenh pkb)
         {
             try
             {
+                if (DaCoPhieuKhamBenh(pkb.MaBenhNhan))
+                {
+                    MessageBox.Show("Bệnh nhân này đã có phiếu khám bệnh, không thể lập thêm.");
+                    return false;
+                }
+
                 using var conn = db.GetConnection();
                 conn.Open();
 

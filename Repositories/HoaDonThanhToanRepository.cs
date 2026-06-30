@@ -87,53 +87,50 @@ namespace QuanLyPhongKham.Repositories
             }
         }
 
-        // Lưu hóa đơn xuống CSDL (mỗi phiếu chỉ 1 hóa đơn: có rồi thì cập nhật, chưa có thì thêm mới)
-        public string LuuHoaDon(HoaDonThanhToan hd)
+        public bool DaCoHoaDon(string maPhieuKhamBenh)
         {
             try
             {
                 using var conn = db.GetConnection();
                 conn.Open();
 
-                // Kiểm tra phiếu này đã có hóa đơn chưa
-                string? maHoaDonCu = null;
-                using (var cmdCheck = new MySqlCommand(
-                    "SELECT MaHoaDon FROM HOADONTHANHTOAN WHERE MaPhieuKhamBenh = @ma", conn))
+                string sql = "SELECT COUNT(*) FROM HOADONTHANHTOAN WHERE MaPhieuKhamBenh = @ma";
+                using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@ma", maPhieuKhamBenh);
+                return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi kiểm tra hóa đơn: " + ex.Message);
+                return false;
+            }
+        }
+
+        // Lưu hóa đơn xuống CSDL (mỗi phiếu chỉ 1 hóa đơn)
+        public string LuuHoaDon(HoaDonThanhToan hd)
+        {
+            try
+            {
+                if (DaCoHoaDon(hd.MaPhieuKhamBenh))
                 {
-                    cmdCheck.Parameters.AddWithValue("@ma", hd.MaPhieuKhamBenh);
-                    var obj = cmdCheck.ExecuteScalar();
-                    if (obj != null) maHoaDonCu = obj.ToString();
+                    MessageBox.Show("Phiếu khám bệnh này đã có hóa đơn thanh toán, không thể lập thêm.");
+                    return string.Empty;
                 }
 
-                if (maHoaDonCu != null)
-                {
-                    // Cập nhật hóa đơn cũ
-                    using var cmdUp = new MySqlCommand(@"
-                        UPDATE HOADONTHANHTOAN
-                        SET TienKham = @tk, TienThuoc = @tt, TongTien = @tong
-                        WHERE MaPhieuKhamBenh = @ma", conn);
-                    cmdUp.Parameters.AddWithValue("@tk", hd.TienKham);
-                    cmdUp.Parameters.AddWithValue("@tt", hd.TienThuoc);
-                    cmdUp.Parameters.AddWithValue("@tong", hd.TongTien);
-                    cmdUp.Parameters.AddWithValue("@ma", hd.MaPhieuKhamBenh);
-                    cmdUp.ExecuteNonQuery();
-                    return maHoaDonCu;
-                }
-                else
-                {
-                    // Thêm hóa đơn mới
-                    string maMoi = SinhMaHoaDon(conn);
-                    using var cmdIns = new MySqlCommand(@"
-                        INSERT INTO HOADONTHANHTOAN (MaHoaDon, MaPhieuKhamBenh, TienKham, TienThuoc, TongTien)
-                        VALUES (@mhd, @ma, @tk, @tt, @tong)", conn);
-                    cmdIns.Parameters.AddWithValue("@mhd", maMoi);
-                    cmdIns.Parameters.AddWithValue("@ma", hd.MaPhieuKhamBenh);
-                    cmdIns.Parameters.AddWithValue("@tk", hd.TienKham);
-                    cmdIns.Parameters.AddWithValue("@tt", hd.TienThuoc);
-                    cmdIns.Parameters.AddWithValue("@tong", hd.TongTien);
-                    cmdIns.ExecuteNonQuery();
-                    return maMoi;
-                }
+                using var conn = db.GetConnection();
+                conn.Open();
+
+                string maMoi = SinhMaHoaDon(conn);
+                using var cmdIns = new MySqlCommand(@"
+                    INSERT INTO HOADONTHANHTOAN (MaHoaDon, MaPhieuKhamBenh, TienKham, TienThuoc, TongTien)
+                    VALUES (@mhd, @ma, @tk, @tt, @tong)", conn);
+                cmdIns.Parameters.AddWithValue("@mhd", maMoi);
+                cmdIns.Parameters.AddWithValue("@ma", hd.MaPhieuKhamBenh);
+                cmdIns.Parameters.AddWithValue("@tk", hd.TienKham);
+                cmdIns.Parameters.AddWithValue("@tt", hd.TienThuoc);
+                cmdIns.Parameters.AddWithValue("@tong", hd.TongTien);
+                cmdIns.ExecuteNonQuery();
+                return maMoi;
             }
             catch (Exception ex)
             {

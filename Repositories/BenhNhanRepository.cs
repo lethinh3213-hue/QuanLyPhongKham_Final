@@ -94,7 +94,10 @@ namespace QuanLyPhongKham.Repositories
 
                 string sql = @"SELECT bn.* FROM BENHNHAN bn
                                INNER JOIN KHAMBENH kb ON bn.MaKhamBenh = kb.MaKhamBenh
-                               WHERE kb.NgayKham = @ngay AND kb.MaLoaiPhongKham = @loai";
+                               LEFT JOIN PHIEUKHAMBENH pkb ON bn.MaBenhNhan = pkb.MaBenhNhan
+                               WHERE kb.NgayKham = @ngay
+                                 AND kb.MaLoaiPhongKham = @loai
+                                 AND pkb.MaPhieuKhamBenh IS NULL";
                 using var cmd = new MySqlCommand(sql, conn);
                 cmd.Parameters.AddWithValue("@ngay", ngayKham.Date);
                 cmd.Parameters.AddWithValue("@loai", maLoaiPhongKham);
