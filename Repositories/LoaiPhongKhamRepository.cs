@@ -27,7 +27,8 @@ namespace QuanLyPhongKham.Repositories
                     {
                         MaLoaiPhongKham = reader.GetString("MaLoaiPhongKham"),
                         TenLoaiPhongKham = reader.GetString("TenLoaiPhongKham"),
-                        SoLuongToiDa = reader.GetInt32("SoLuongToiDa")
+                        SoLuongToiDa = reader.GetInt32("SoLuongToiDa"),
+                        TienKham = reader.GetDecimal("TienKham")
                     });
                 }
             }
@@ -38,5 +39,30 @@ namespace QuanLyPhongKham.Repositories
 
             return ds;
         }
+
+        public bool CapNhat(LoaiPhongKham lpk)
+        {
+            try
+            {
+                using var conn = db.GetConnection();
+                conn.Open();
+
+                string sql = "UPDATE LOAIPHONGKHAM SET TenLoaiPhongKham = @ten, SoLuongToiDa = @sl, TienKham = @tien WHERE MaLoaiPhongKham = @ma";
+                using var cmd = new MySqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("@ten", lpk.TenLoaiPhongKham);
+                cmd.Parameters.AddWithValue("@sl", lpk.SoLuongToiDa);
+                cmd.Parameters.AddWithValue("@tien", lpk.TienKham);
+                cmd.Parameters.AddWithValue("@ma", lpk.MaLoaiPhongKham);
+                cmd.ExecuteNonQuery();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật loại phòng khám: " + ex.Message);
+                return false;
+            }
+        }
+
     }
 }

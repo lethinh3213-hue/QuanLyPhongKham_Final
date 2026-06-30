@@ -45,6 +45,11 @@ namespace QuanLyPhongKham.Views
             new LapBaoCaoThuocView().Show();
         }
 
+        private void ThayDoiQuyDinh_Click(object sender, RoutedEventArgs e)
+        {
+            new ThayDoiQuyDinhView().Show();
+        }
+
         private void Thoat_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();

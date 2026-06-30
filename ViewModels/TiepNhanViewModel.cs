@@ -88,7 +88,7 @@ namespace QuanLyPhongKham.ViewModels
                 return false;
             }
 
-            int daCoTrongNgay = _khamBenhRepo.DemSoBenhNhanTrongNgay(NgayKham, LoaiPhongKhamDuocChon.MaLoaiPhongKham);
+            int daCoTrongNgay = _khamBenhRepo.DemSoBenhNhanTrongNgay(NgayKham,LoaiPhongKhamDuocChon.MaLoaiPhongKham);
             int dangNhapThem = DanhSachBenhNhan.Count;
             int tong = daCoTrongNgay + dangNhapThem;
             int soLuongToiDa = LoaiPhongKhamDuocChon.SoLuongToiDa;
